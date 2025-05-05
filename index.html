@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meta3D Expense Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e7ecf0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 100px;
+      transition: 0.3s;
+    }
+    .menu-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      margin: 20px auto;
+      width: fit-content;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 999;
+    }
+    .menu-btn {
+      background: linear-gradient(145deg, #ffffff, #e0e0e0);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
+    }
+    .menu-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    .meta-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1877f2;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      margin: 8px 0;
+    }
+    .row label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    button {
+      width: 100%;
+      background-color: #1877f2;
+      color: white;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #145dc4;
+    }
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .box {
+      width: 30%;
+      background: #f0f2f5;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .green { color: green; }
+    .red { color: red; }
+    .history {
+      margin-top: 20px;
+    }
+    .transaction {
+      background: #f9f9f9;
+      padding: 10px;
+      border-left: 5px solid;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .transaction.income { border-color: green; }
+    .transaction.expense { border-color: red; }
+    .details { flex: 1; }
+    .actions button {
+      margin-left: 5px;
+      background: #eee;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .actions button:hover { background: #ccc; }
+    #category { display: none; }
+
+    /* Dark Mode */
+    .dark-mode {
+      background: #1e1e1e;
+      color: #eee;
+    }
+    .dark-mode .container {
+      background: #2c2c2c;
+      color: #eee;
+    }
+    .dark-mode input, .dark-mode select {
+      background: #3a3a3a;
+      color: #fff;
+      border-color: #666;
+    }
+    .dark-mode .box { background: #444; }
+    .dark-mode .menu-bar {
+      background: rgba(40, 40, 40, 0.7);
+    }
+    .dark-mode .menu-btn {
+      background: linear-gradient(145deg, #2e2e2e, #1e1e1e);
+      color: #eee;
+    }
+
+    #page1, #page2 { display: none; }
+    #page1 { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-bar">
+    <button class="menu-btn" onclick="window.location.href='home.html'">🏠 <span>Home</span></button>
+    <button class="menu-btn" id="themeToggle">☀️ <span>Light</span></button>
+  </div>
+
+  <div id="page1" class="container">
+    <div class="meta-logo">🟦 Meta3D Tracker</div>
+
+    <div class="row">
+      <label><input type="radio" name="type" value="income" checked onchange="toggleCategory()"> รายรับ</label>
+      <label><input type="radio" name="type" value="expense" onchange="toggleCategory()"> รายจ่าย</label>
+    </div>
+
+    <select id="category">
+      <option value="">เลือกหมวดหมู่</option>
+      <option value="ค่าน้ำ">ค่าน้ำ</option>
+      <option value="ค่าไฟ">ค่าไฟ</option>
+      <option value="ค่ากิน">ค่ากิน</option>
+      <option value="ค่าน้ำมัน">ค่าน้ำมัน</option>
+      <option value="อื่นๆ">อื่นๆ</option>
+    </select>
+
+    <input type="text" id="description" placeholder="รายละเอียดเพิ่มเติม" />
+    <input type="number" id="amount" placeholder="จำนวนเงิน (เช่น 500 หรือ -300)" />
+    <button onclick="addTransaction()">บันทึก</button>
+
+    <div class="summary">
+      <div class="box">
+        <h4>Income</h4>
+        <p id="income" class="green">+$0.00</p>
+      </div>
+      <div class="box">
+        <h4>Expense</h4>
+        <p id="expense" class="red">-$0.00</p>
+      </div>
+      <div class="box">
+        <h4>Balance</h4>
+        <p id="balance">$0.00</p>
+      </div>
+    </div>
+
+    <div class="history">
+      <h4>ประวัติรายการ</h4>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <div id="page2" class="container">
+    <div class="meta-logo">🟩 Page 2</div>
+    <h3>ยินดีต้อนรับสู่หน้า 2</h3>
+    <p>นี่คือลิงก์ไปยังหน้าที่สอง</p>
+    <button onclick="goBack()">กลับไปหน้าแรก</button>
+  </div>
+
+  <script>
+    let income = 0;
+    let expense = 0;
+    let history = [];
+
+    function saveData() {
+      localStorage.setItem("meta3d-data", JSON.stringify({ income, expense, history }));
+    }
+
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem("meta3d-data"));
+      if (data) {
+        income = data.income || 0;
+        expense = data.expense || 0;
+        history = data.history || [];
+        updateSummary();
+        renderHistory();
+      }
+    }
+
+    function toggleCategory() {
+      const type = document.querySelector('input[name="type"]:checked').value;
+      document.getElementById('category').style.display = type === 'expense' ? 'block' : 'none';
+    }
+
+    function formatDate() {
+      return new Date().toLocaleString('th-TH', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      });
+    }
+
+    function updateSummary() {
+      const balance = income - expense;
+      document.getElementById("income").textContent = `+$${income.toFixed(2)}`;
+      document.getElementById("expense").textContent = `-$${expense.toFixed(2)}`;
+      document.getElementById("balance").textContent = `$${balance.toFixed(2)}`;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById("history-list");
+      container.innerHTML = "";
+      history.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = `transaction ${item.type}`;
+        div.innerHTML = `
+          <div class="details">
+            <strong>${item.type === "income" ? "รายรับ" : item.category}</strong> - ${item.description}<br>
+            <small>${item.date}</small>
+          </div>
+          <div>
+            <span>${item.type === "income" ? "+" : "-"}$${item.amount.toFixed(2)}</span>
+            <div class="actions">
+              <button onclick="editTransaction(${index})">✏️</button>
+              <button onclick="deleteTransaction(${index})">🗑️</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addTransaction() {
+      const type = document.querySelector('input[name="type"]:checked').value;
+      const category = document.getElementById("category").value || "-";
+      const description = document.getElementById("description").value.trim();
+      const amount = parseFloat(document.getElementById("amount").value);
+      const date = formatDate();
+
+      if (!description || isNaN(amount)) {
+        alert("กรุณากรอกรายละเอียดและจำนวนเงินให้ถูกต้อง");
+        return;
+      }
+
+      const item = {
+        type,
+        category: type === "expense" ? category : "-",
+        description,
+        amount: Math.abs(amount),
+        date
+      };
+
+      if (type === "income") income += item.amount;
+      else expense += item.amount;
+
+      history.unshift(item);
+      updateSummary();
+      renderHistory();
+      saveData();
+
+      document.getElementById("description").value = "";
+      document.getElementById("amount").value = "";
+      document.getElementById("category").value = "";
+    }
+
+    function deleteTransaction(index) {
+      const item = history[index];
+      if (item.type === "income") income -= item.amount;
+      else expense -= item.amount;
+
+      history.splice(index, 1);
+      updateSummary();
+      renderHistory();
+      saveData();
+    }
+
+    function editTransaction(index) {
+      const item = history[index];
+      document.querySelector(`input[name="type"][value="${item.type}"]`).checked = true;
+      toggleCategory();
+      document.getElementById("category").value = item.category;
+      document.getElementById("description").value = item.description;
+      document.getElementById("amount").value = item.amount;
+      deleteTransaction(index);
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDark = document.body.classList.contains("dark-mode");
+      document.getElementById("themeToggle").innerHTML = isDark ? "🌙 <span>Dark</span>" : "☀️ <span>Light</span>";
+      localStorage.setItem("meta3d-theme", isDark ? "dark" : "light");
+    });
+
+    document.getElementById("homeBtn").addEventListener("click", () => {
+      document.getElementById("page1").style.display = "none";
+      document.getElementById("page2").style.display = "block";
+    });
+
+    function goBack() {
+      document.getElementById("page2").style.display = "none";
+      document.getElementById("page1").style.display = "block";
+    }
+
+    // Initial load
+    window.onload = () => {
+      loadData();
+      toggleCategory();
+      const savedTheme = localStorage.getItem("meta3d-theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("themeToggle").innerHTML = "🌙 <span>Dark</span>";
+      }
+    }
+  </script>
+</body>
+</html>
